@@ -1,5 +1,5 @@
 // src/screens/PaisesScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
 import { supabase } from "../../supabaseClient";
@@ -18,11 +17,7 @@ export default function PaisesScreen({ route, navigation }) {
   const [paises, setPaises] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    carregarPaises();
-  }, [continente]);
-
-  const carregarPaises = async () => {
+  const carregarPaises = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -39,7 +34,11 @@ export default function PaisesScreen({ route, navigation }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [continente.id_continentes]);
+
+  useEffect(() => {
+    carregarPaises();
+  }, [carregarPaises]);
 
   const excluirPais = async (id, nome) => {
     // Verificar se existem cidades associadas
@@ -125,15 +124,15 @@ export default function PaisesScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color="#286840" />
         <Text style={styles.loadingText}>Carregando países...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
@@ -176,7 +175,7 @@ export default function PaisesScreen({ route, navigation }) {
         <Ionicons name="arrow-back" size={20} color="#286840" />
         <Text style={styles.backButtonText}>Voltar para Continentes</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 

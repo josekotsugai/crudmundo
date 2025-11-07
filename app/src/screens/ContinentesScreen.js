@@ -1,5 +1,5 @@
 // src/screens/ContinentesScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
 import { supabase } from "../../supabaseClient";
@@ -17,11 +16,7 @@ export default function ContinentesScreen({ navigation }) {
   const [continentes, setContinentes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    carregarContinentes();
-  }, []);
-
-  const carregarContinentes = async () => {
+  const carregarContinentes = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -39,7 +34,11 @@ export default function ContinentesScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    carregarContinentes();
+  }, [carregarContinentes]);
 
   const excluirContinente = async (id, nome) => {
     // Verificar se existem países associados
@@ -124,15 +123,15 @@ export default function ContinentesScreen({ navigation }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color="#286840" />
         <Text style={styles.loadingText}>Carregando continentes...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header com logo e título */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
@@ -156,6 +155,12 @@ export default function ContinentesScreen({ navigation }) {
         <View style={styles.emptyContainer}>
           <Ionicons name="sad-outline" size={50} color="#666" />
           <Text style={styles.emptyText}>Nenhum continente cadastrado</Text>
+          <TouchableOpacity
+            style={styles.emptyButton}
+            onPress={() => navigation.navigate("CadastroContinente")}
+          >
+            <Text style={styles.emptyButtonText}>Cadastrar Primeiro Continente</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -166,7 +171,7 @@ export default function ContinentesScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -276,6 +281,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
     textAlign: "center",
+    marginBottom: 20,
+  },
+  emptyButton: {
+    backgroundColor: "#286840",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  emptyButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   loadingText: {
     color: "#b6b6b6",

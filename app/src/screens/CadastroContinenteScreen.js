@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
 import { supabase } from "../../supabaseClient";
@@ -42,7 +41,7 @@ export default function CadastroContinenteScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
@@ -88,7 +87,7 @@ export default function CadastroContinenteScreen({ navigation }) {
           <Text style={styles.backButtonText}>Voltar para Continentes</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

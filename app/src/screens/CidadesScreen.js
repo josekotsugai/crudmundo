@@ -1,5 +1,5 @@
 // src/screens/CidadesScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,42 +7,41 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
-import { supabase } from "../../supabaseClient";
-import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../../supabaseClient"; // Cliente do banco
+import { Ionicons } from "@expo/vector-icons"; // Ícones
 
 export default function CidadesScreen({ route, navigation }) {
-  const { pais, continente } = route.params;
-  const [cidades, setCidades] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { pais, continente } = route.params; // País e continente recebidos
+  const [cidades, setCidades] = useState([]); // Lista de cidades
+  const [loading, setLoading] = useState(true); // Estado de carregamento
 
-  useEffect(() => {
-    carregarCidades();
-  }, [pais]);
-
-  const carregarCidades = async () => {
+  // Carrega cidades do banco
+  const carregarCidades = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("cidades")
         .select("*")
-        .eq("id_pais", pais.id_paises)
-        .order("nm_cidades");
+        .eq("id_pais", pais.id_paises) // Filtra por país
+        .order("nm_cidades"); // Ordena por nome
 
       if (error) throw error;
-
       setCidades(data || []);
     } catch (error) {
       Alert.alert("Erro", "Erro ao carregar cidades: " + error.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pais.id_paises]);
 
+  useEffect(() => {
+    carregarCidades();
+  }, [carregarCidades]);
+
+  // Exclui cidade com confirmação
   const excluirCidade = async (id, nome) => {
-    // Confirmar exclusão
     Alert.alert(
       "Confirmar Exclusão",
       `Tem certeza que deseja excluir a cidade "${nome}"?`,
@@ -60,7 +59,7 @@ export default function CidadesScreen({ route, navigation }) {
             if (error) {
               Alert.alert("Erro", "Erro ao excluir cidade: " + error.message);
             } else {
-              carregarCidades();
+              carregarCidades(); // Recarrega a lista
             }
           },
         },
@@ -68,6 +67,7 @@ export default function CidadesScreen({ route, navigation }) {
     );
   };
 
+  // Renderiza cada item da lista
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.itemInfo}>
@@ -95,18 +95,19 @@ export default function CidadesScreen({ route, navigation }) {
     </View>
   );
 
+  // Tela de loading
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color="#286840" />
         <Text style={styles.loadingText}>Carregando cidades...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <View style={styles.container}>
+      {/* Cabeçalho com informações */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Ionicons name="business" size={40} color="#286840" />
@@ -117,7 +118,7 @@ export default function CidadesScreen({ route, navigation }) {
         </Text>
       </View>
 
-      {/* Botão de adicionar */}
+      {/* Botão para adicionar nova cidade */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("CadastroCidade", { pais, continente })}
@@ -126,7 +127,7 @@ export default function CidadesScreen({ route, navigation }) {
         <Text style={styles.addButtonText}>Cadastrar Nova Cidade</Text>
       </TouchableOpacity>
 
-      {/* Lista de cidades */}
+      {/* Lista de cidades ou mensagem vazia */}
       {cidades.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="business-outline" size={50} color="#666" />
@@ -142,7 +143,7 @@ export default function CidadesScreen({ route, navigation }) {
         />
       )}
 
-      {/* Botões de navegação */}
+      {/* Navegação entre telas */}
       <View style={styles.navigationButtons}>
         <TouchableOpacity
           style={styles.backButton}
@@ -160,10 +161,11 @@ export default function CidadesScreen({ route, navigation }) {
           <Text style={styles.backButtonText}>Voltar para Continentes</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
+// Estilos com tema escuro
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#FF9500",
+    borderLeftColor: "#FF9500", // Laranja para cidades
   },
   itemInfo: {
     marginBottom: 12,
@@ -246,10 +248,10 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   editButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#007AFF", // Azul para editar
   },
   deleteButton: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: "#FF3B30", // Vermelho para excluir
   },
   actionText: {
     color: "#fff",

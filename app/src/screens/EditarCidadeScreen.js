@@ -7,17 +7,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
-import { supabase } from "../../supabaseClient";
-import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../../supabaseClient"; // Cliente do banco
+import { Ionicons } from "@expo/vector-icons"; // Ícones
 
 export default function EditarCidadeScreen({ route, navigation }) {
-  const { cidade, pais, continente } = route.params;
-  const [nomeCidade, setNomeCidade] = useState(cidade.nm_cidades);
-  const [loading, setLoading] = useState(false);
+  const { cidade, pais, continente } = route.params; // Dados recebidos
+  const [nomeCidade, setNomeCidade] = useState(cidade.nm_cidades); // Nome atual da cidade
+  const [loading, setLoading] = useState(false); // Estado de carregamento
 
+  // Atualiza cidade no banco de dados
   const atualizarCidade = async () => {
     if (!nomeCidade.trim()) {
       Alert.alert("Erro", "Por favor, informe o nome da cidade");
@@ -29,9 +29,9 @@ export default function EditarCidadeScreen({ route, navigation }) {
       const { error } = await supabase
         .from("cidades")
         .update({ 
-          nm_cidades: nomeCidade.trim()
+          nm_cidades: nomeCidade.trim() // Atualiza apenas o nome
         })
-        .eq("id_cidades", cidade.id_cidades);
+        .eq("id_cidades", cidade.id_cidades); // Filtra por ID
 
       if (error) throw error;
 
@@ -49,9 +49,9 @@ export default function EditarCidadeScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
+        {/* Cabeçalho com informações contextuais */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Ionicons name="business" size={40} color="#286840" />
@@ -63,7 +63,7 @@ export default function EditarCidadeScreen({ route, navigation }) {
           <Text style={styles.idText}>ID: #{cidade.id_cidades}</Text>
         </View>
 
-        {/* Formulário */}
+        {/* Formulário de edição */}
         <View style={styles.formContainer}>
           <Text style={styles.label}>Nome da Cidade</Text>
           <TextInput
@@ -73,6 +73,7 @@ export default function EditarCidadeScreen({ route, navigation }) {
             placeholderTextColor="#666"
           />
 
+          {/* Botão de atualização */}
           <TouchableOpacity
             style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             onPress={atualizarCidade}
@@ -89,7 +90,7 @@ export default function EditarCidadeScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Links de navegação */}
+        {/* Links alternativos de navegação */}
         <View style={styles.navigationLinks}>
           <TouchableOpacity
             style={styles.navButton}
@@ -108,10 +109,11 @@ export default function EditarCidadeScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
+// Estilos com tema escuro consistente
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submitButtonDisabled: {
-    backgroundColor: "#666",
+    backgroundColor: "#666", // Cinza quando desabilitado
   },
   submitButtonText: {
     color: "#fff",

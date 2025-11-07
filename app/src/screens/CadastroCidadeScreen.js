@@ -7,17 +7,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
-import { supabase } from "../../supabaseClient";
-import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../../supabaseClient"; // Conexão com o banco
+import { Ionicons } from "@expo/vector-icons"; // Ícones da interface
 
 export default function CadastroCidadeScreen({ route, navigation }) {
-  const { pais, continente } = route.params;
-  const [nomeCidade, setNomeCidade] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { pais, continente } = route.params; // Dados recebidos da tela anterior
+  const [nomeCidade, setNomeCidade] = useState(""); // Estado do nome da cidade
+  const [loading, setLoading] = useState(false); // Estado de carregamento
 
+  // Função para cadastrar nova cidade no banco
   const cadastrarCidade = async () => {
     if (!nomeCidade.trim()) {
       Alert.alert("Erro", "Por favor, informe o nome da cidade");
@@ -31,7 +31,7 @@ export default function CadastroCidadeScreen({ route, navigation }) {
         .insert([
           { 
             nm_cidades: nomeCidade.trim(), 
-            id_pais: pais.id_paises 
+            id_pais: pais.id_paises // Associa cidade ao país
           }
         ]);
 
@@ -51,9 +51,9 @@ export default function CadastroCidadeScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
+        {/* Cabeçalho com informações do país e continente */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Ionicons name="business" size={40} color="#286840" />
@@ -64,7 +64,7 @@ export default function CadastroCidadeScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Formulário */}
+        {/* Formulário de cadastro */}
         <View style={styles.formContainer}>
           <Text style={styles.label}>Nome da Cidade</Text>
           <TextInput
@@ -75,6 +75,7 @@ export default function CadastroCidadeScreen({ route, navigation }) {
             placeholderTextColor="#666"
           />
 
+          {/* Botão de submit com estados de loading */}
           <TouchableOpacity
             style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             onPress={cadastrarCidade}
@@ -91,7 +92,7 @@ export default function CadastroCidadeScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Botão Voltar */}
+        {/* Botão para voltar à lista de cidades */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate("Cidades", { pais, continente })}
@@ -100,14 +101,15 @@ export default function CadastroCidadeScreen({ route, navigation }) {
           <Text style={styles.backButtonText}>← Voltar para Cidades</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
+// Estilos com tema escuro e cores personalizadas
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#202020",
+    backgroundColor: "#202020", // Cor de fundo principal
   },
   scrollContainer: {
     flexGrow: 1,
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   logoContainer: {
-    backgroundColor: "#1e1c2e",
+    backgroundColor: "#1e1c2e", // Container do ícone
     padding: 15,
     borderRadius: 50,
     marginBottom: 10,
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   formContainer: {
-    backgroundColor: "#1e1c2e",
+    backgroundColor: "#1e1c2e", // Container do formulário
     borderRadius: 10,
     padding: 20,
     marginBottom: 20,
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   input: {
-    backgroundColor: "#2e2e3e",
+    backgroundColor: "#2e2e3e", // Campo de entrada
     color: "#b6b6b6",
     padding: 15,
     borderRadius: 10,
@@ -160,14 +162,14 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flexDirection: "row",
-    backgroundColor: "#286840",
+    backgroundColor: "#286840", // Verde principal
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   submitButtonDisabled: {
-    backgroundColor: "#666",
+    backgroundColor: "#666", // Cinza quando desabilitado
   },
   submitButtonText: {
     color: "#fff",
@@ -182,7 +184,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#286840",
+    borderColor: "#286840", // Borda verde
   },
   backButtonText: {
     color: "#286840",

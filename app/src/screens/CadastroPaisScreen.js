@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
 import { supabase } from "../../supabaseClient";
@@ -53,7 +52,7 @@ export default function CadastroPaisScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
@@ -109,7 +108,7 @@ export default function CadastroPaisScreen({ route, navigation }) {
           <Text style={styles.backButtonText}>← Voltar para Países</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -143,6 +142,7 @@ const styles = StyleSheet.create({
     color: "#b6b6b6",
     fontSize: 16,
     marginTop: 5,
+    textAlign: "center",
   },
   formContainer: {
     backgroundColor: "#1e1c2e",
