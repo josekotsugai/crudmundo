@@ -8,14 +8,15 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
-import { supabase } from "../../supabaseClient"; // Cliente do banco
-import { Ionicons } from "@expo/vector-icons"; // Ícones
+import { supabase } from "../../supabaseClient";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CidadesScreen({ route, navigation }) {
-  const { pais, continente } = route.params; // País e continente recebidos
-  const [cidades, setCidades] = useState([]); // Lista de cidades
-  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const { pais, continente } = route.params;
+  const [cidades, setCidades] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Carrega cidades do banco
   const carregarCidades = useCallback(async () => {
@@ -24,8 +25,8 @@ export default function CidadesScreen({ route, navigation }) {
       const { data, error } = await supabase
         .from("cidades")
         .select("*")
-        .eq("id_pais", pais.id_paises) // Filtra por país
-        .order("nm_cidades"); // Ordena por nome
+        .eq("id_pais", pais.id_paises)
+        .order("nm_cidades");
 
       if (error) throw error;
       setCidades(data || []);
@@ -40,31 +41,54 @@ export default function CidadesScreen({ route, navigation }) {
     carregarCidades();
   }, [carregarCidades]);
 
-  // Exclui cidade com confirmação
+  // Excluir cidade — usando window.confirm no Web
   const excluirCidade = async (id, nome) => {
-    Alert.alert(
-      "Confirmar Exclusão",
-      `Tem certeza que deseja excluir a cidade "${nome}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase
-              .from("cidades")
-              .delete()
-              .eq("id_cidades", id);
+    let confirmar = false;
 
-            if (error) {
-              Alert.alert("Erro", "Erro ao excluir cidade: " + error.message);
-            } else {
-              carregarCidades(); // Recarrega a lista
-            }
+    if (Platform.OS === "web") {
+      confirmar = window.confirm(
+        `Tem certeza que deseja excluir a cidade "${nome}"?`
+      );
+    } else {
+      // Mobile: usa Alert normal
+      return Alert.alert(
+        "Confirmar Exclusão",
+        `Tem certeza que deseja excluir a cidade "${nome}"?`,
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: async () => {
+              const { error } = await supabase
+                .from("cidades")
+                .delete()
+                .eq("id_cidades", id);
+
+              if (error) {
+                Alert.alert("Erro", "Erro ao excluir cidade: " + error.message);
+              } else {
+                carregarCidades();
+              }
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
+
+    if (!confirmar) return;
+
+    // Executado apenas no Web
+    const { error } = await supabase
+      .from("cidades")
+      .delete()
+      .eq("id_cidades", id);
+
+    if (error) {
+      window.alert("Erro ao excluir cidade: " + error.message);
+    } else {
+      carregarCidades();
+    }
   };
 
   // Renderiza cada item da lista
@@ -74,11 +98,13 @@ export default function CidadesScreen({ route, navigation }) {
         <Text style={styles.itemId}>#{item.id_cidades}</Text>
         <Text style={styles.itemNome}>{item.nm_cidades}</Text>
       </View>
-      
+
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
-          onPress={() => navigation.navigate("EditarCidade", { cidade: item, pais, continente })}
+          onPress={() =>
+            navigation.navigate("EditarCidade", { cidade: item, pais, continente })
+          }
         >
           <Ionicons name="pencil" size={14} color="#fff" />
           <Text style={styles.actionText}>Editar</Text>
@@ -95,7 +121,6 @@ export default function CidadesScreen({ route, navigation }) {
     </View>
   );
 
-  // Tela de loading
   if (loading) {
     return (
       <View style={styles.container}>
@@ -107,7 +132,7 @@ export default function CidadesScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho com informações */}
+      {/* Cabeçalho */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Ionicons name="business" size={40} color="#286840" />
@@ -118,20 +143,24 @@ export default function CidadesScreen({ route, navigation }) {
         </Text>
       </View>
 
-      {/* Botão para adicionar nova cidade */}
+      {/* Botão adicionar */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("CadastroCidade", { pais, continente })}
+        onPress={() =>
+          navigation.navigate("CadastroCidade", { pais, continente })
+        }
       >
         <Ionicons name="add-circle" size={20} color="#fff" />
         <Text style={styles.addButtonText}>Cadastrar Nova Cidade</Text>
       </TouchableOpacity>
 
-      {/* Lista de cidades ou mensagem vazia */}
+      {/* Lista */}
       {cidades.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="business-outline" size={50} color="#666" />
-          <Text style={styles.emptyText}>Nenhuma cidade cadastrada para este país</Text>
+          <Text style={styles.emptyText}>
+            Nenhuma cidade cadastrada para este país
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -143,7 +172,7 @@ export default function CidadesScreen({ route, navigation }) {
         />
       )}
 
-      {/* Navegação entre telas */}
+      {/* Navegação */}
       <View style={styles.navigationButtons}>
         <TouchableOpacity
           style={styles.backButton}
@@ -165,7 +194,7 @@ export default function CidadesScreen({ route, navigation }) {
   );
 }
 
-// Estilos com tema escuro
+/* --- ESTILOS --- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -218,7 +247,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#FF9500", // Laranja para cidades
+    borderLeftColor: "#FF9500",
   },
   itemInfo: {
     marginBottom: 12,
@@ -248,10 +277,10 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   editButton: {
-    backgroundColor: "#007AFF", // Azul para editar
+    backgroundColor: "#007AFF",
   },
   deleteButton: {
-    backgroundColor: "#FF3B30", // Vermelho para excluir
+    backgroundColor: "#FF3B30",
   },
   actionText: {
     color: "#fff",

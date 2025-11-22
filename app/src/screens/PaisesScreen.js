@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { supabase } from "../../supabaseClient";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,7 +31,9 @@ export default function PaisesScreen({ route, navigation }) {
 
       setPaises(data || []);
     } catch (error) {
-      Alert.alert("Erro", "Erro ao carregar países: " + error.message);
+      Platform.OS === "web"
+        ? alert("Erro ao carregar países: " + error.message)
+        : Alert.alert("Erro", "Erro ao carregar países: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -40,6 +43,25 @@ export default function PaisesScreen({ route, navigation }) {
     carregarPaises();
   }, [carregarPaises]);
 
+  // 🚨 Função de confirmação universal
+  const confirmar = (mensagem) => {
+    if (Platform.OS === "web") {
+      return Promise.resolve(window.confirm(mensagem));
+    } else {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirmar Exclusão",
+          mensagem,
+          [
+            { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
+            { text: "Excluir", style: "destructive", onPress: () => resolve(true) }
+          ]
+        );
+      });
+    }
+  };
+
+  // 🚨 Excluir país com validação + confirmação universal
   const excluirPais = async (id, nome) => {
     // Verificar se existem cidades associadas
     const { data: cidades, error } = await supabase
@@ -48,42 +70,35 @@ export default function PaisesScreen({ route, navigation }) {
       .eq("id_pais", id);
 
     if (error) {
-      Alert.alert("Erro", "Erro ao verificar cidades: " + error.message);
+      Platform.OS === "web"
+        ? alert("Erro ao verificar cidades: " + error.message)
+        : Alert.alert("Erro", "Erro ao verificar cidades: " + error.message);
       return;
     }
 
     if (cidades && cidades.length > 0) {
-      Alert.alert(
-        "Não é possível excluir",
-        `Não é possível excluir o país "${nome}" pois existem cidades associadas a ele. Exclua as cidades primeiro.`
-      );
+      const msg = `Não é possível excluir o país "${nome}" pois existem cidades associadas a ele.`;
+      Platform.OS === "web" ? alert(msg) : Alert.alert("Não é possível excluir", msg);
       return;
     }
 
-    // Confirmar exclusão
-    Alert.alert(
-      "Confirmar Exclusão",
-      `Tem certeza que deseja excluir o país "${nome}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase
-              .from("paises")
-              .delete()
-              .eq("id_paises", id);
+    // Confirmação da exclusão
+    const ok = await confirmar(`Tem certeza que deseja excluir o país "${nome}"?`);
+    if (!ok) return;
 
-            if (error) {
-              Alert.alert("Erro", "Erro ao excluir país: " + error.message);
-            } else {
-              carregarPaises();
-            }
-          },
-        },
-      ]
-    );
+    // Exclusão
+    const { error: deleteError } = await supabase
+      .from("paises")
+      .delete()
+      .eq("id_paises", id);
+
+    if (deleteError) {
+      Platform.OS === "web"
+        ? alert("Erro ao excluir país: " + deleteError.message)
+        : Alert.alert("Erro", "Erro ao excluir país: " + deleteError.message);
+    } else {
+      carregarPaises();
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -93,7 +108,7 @@ export default function PaisesScreen({ route, navigation }) {
         <Text style={styles.itemNome}>{item.nm_pais}</Text>
         <Text style={styles.itemLingua}>Língua: {item.lingua_falada}</Text>
       </View>
-      
+
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}

@@ -4,9 +4,10 @@ include 'conexão.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nm_pais = $_POST['nm_pais'];
     $lingua_falada = $_POST['lingua_falada'];
+    $moeda = $_POST['moeda'];
     $id_continente = $_POST['id_continente'];
     
-    $sql = "INSERT INTO paises (nm_pais, lingua_falada, id_continente) VALUES ('$nm_pais', '$lingua_falada', $id_continente)";
+    $sql = "INSERT INTO paises (nm_pais, lingua_falada, moeda, id_continente) VALUES ('$nm_pais', '$lingua_falada', '$moeda', $id_continente)";
     
     if ($conex->query($sql) === TRUE) {
         header("Location: paises.php?continente_id=" . $id_continente);
@@ -45,6 +46,7 @@ $continente = $result_continente->fetch_assoc();
             <input type="hidden" name="id_continente" value="<?php echo $continente_id; ?>">
             Nome do País: <input type="text" name="nm_pais" required><br><br>
             Língua Falada: <input type="text" name="lingua_falada" required><br><br>
+            Moeda: <input type="text" name="moeda" required><br><br>
             <input type="submit" value="Cadastrar País">
         </form>
         

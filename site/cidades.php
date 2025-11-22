@@ -42,15 +42,18 @@ $result_cidades = $conex->query($sql_cidades);
             <tr>
                 <th>ID</th>
                 <th>Nome da Cidade</th>
+                <th>População</th>
                 <th>Ações</th>
             </tr>
 
             <?php
             if ($result_cidades->num_rows > 0) {
                 while ($row = $result_cidades->fetch_assoc()) {
+                    $populacao_formatada = $row["populacao"] ? number_format($row["populacao"], 0, ',', '.') : '0';
                     echo "<tr>
                             <td>" . $row["id_cidades"] . "</td>
                             <td>" . $row["nm_cidades"] . "</td>
+                            <td>" . $populacao_formatada . " habitantes</td>
                             <td>
                                 <a href='editar_cidade.php?id=" . $row["id_cidades"] . "'>Editar</a>
                                 <a href='deletar_cidade.php?id=" . $row["id_cidades"] . "' onclick='return confirm(\"Tem certeza?\")'>Excluir</a>
@@ -58,7 +61,7 @@ $result_cidades = $conex->query($sql_cidades);
                         </tr>";
                 }
             } else {
-                echo "<tr><td colspan='3'>Nenhuma cidade cadastrada para este país</td></tr>";
+                echo "<tr><td colspan='4'>Nenhuma cidade cadastrada para este país</td></tr>";
             }
             ?>
         </table>
@@ -70,3 +73,7 @@ $result_cidades = $conex->query($sql_cidades);
     </div>
 </body>
 </html>
+
+<?php
+$conex->close();
+?>

@@ -1,4 +1,3 @@
-// src/screens/ContinentesScreen.js
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -8,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform
 } from "react-native";
 import { supabase } from "../../supabaseClient";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,7 +30,8 @@ export default function ContinentesScreen({ navigation }) {
 
       setContinentes(data || []);
     } catch (error) {
-      Alert.alert("Erro", "Erro ao carregar continentes: " + error.message);
+      if (Platform.OS === "web") alert("Erro ao carregar continentes: " + error.message);
+      else Alert.alert("Erro", "Erro ao carregar continentes: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -40,50 +41,63 @@ export default function ContinentesScreen({ navigation }) {
     carregarContinentes();
   }, [carregarContinentes]);
 
+  // 🚨 Função de confirmação universal (web + mobile)
+  const confirmar = (mensagem) => {
+    if (Platform.OS === "web") {
+      return Promise.resolve(window.confirm(mensagem));
+    } else {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Confirmar Exclusão",
+          mensagem,
+          [
+            { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
+            { text: "Excluir", style: "destructive", onPress: () => resolve(true) }
+          ]
+        );
+      });
+    }
+  };
+
+  // 🚨 Função excluir continente adaptada
   const excluirContinente = async (id, nome) => {
-    // Verificar se existem países associados
+
+    // Verificar países
     const { data: paises, error } = await supabase
       .from("paises")
       .select("id_paises")
       .eq("id_continente", id);
 
     if (error) {
-      Alert.alert("Erro", "Erro ao verificar países: " + error.message);
+      Platform.OS === "web"
+        ? alert("Erro ao verificar países: " + error.message)
+        : Alert.alert("Erro", "Erro ao verificar países: " + error.message);
       return;
     }
 
     if (paises && paises.length > 0) {
-      Alert.alert(
-        "Não é possível excluir",
-        `Não é possível excluir o continente "${nome}" pois existem países associados a ele. Exclua os países primeiro.`
-      );
+      const msg = `Não é possível excluir o continente "${nome}" pois existem países associados a ele.`;
+      Platform.OS === "web" ? alert(msg) : Alert.alert("Não é possível excluir", msg);
       return;
     }
 
-    // Confirmar exclusão
-    Alert.alert(
-      "Confirmar Exclusão",
-      `Tem certeza que deseja excluir o continente "${nome}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase
-              .from("continentes")
-              .delete()
-              .eq("id_continentes", id);
+    // ❗ Confirmação antes de excluir
+    const ok = await confirmar(`Tem certeza que deseja excluir o continente "${nome}"?`);
+    if (!ok) return;
 
-            if (error) {
-              Alert.alert("Erro", "Erro ao excluir continente: " + error.message);
-            } else {
-              carregarContinentes();
-            }
-          },
-        },
-      ]
-    );
+    // Exclusão
+    const { error: deleteError } = await supabase
+      .from("continentes")
+      .delete()
+      .eq("id_continentes", id);
+
+    if (deleteError) {
+      Platform.OS === "web"
+        ? alert("Erro ao excluir continente: " + deleteError.message)
+        : Alert.alert("Erro", "Erro ao excluir continente: " + deleteError.message);
+    } else {
+      carregarContinentes();
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -92,7 +106,7 @@ export default function ContinentesScreen({ navigation }) {
         <Text style={styles.itemId}>#{item.id_continentes}</Text>
         <Text style={styles.itemNome}>{item.nm_continente}</Text>
       </View>
-      
+
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
@@ -132,7 +146,7 @@ export default function ContinentesScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header com logo e título */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Ionicons name="globe" size={40} color="#286840" />
@@ -150,7 +164,7 @@ export default function ContinentesScreen({ navigation }) {
         <Text style={styles.addButtonText}>Cadastrar Novo Continente</Text>
       </TouchableOpacity>
 
-      {/* Lista de continentes */}
+      {/* Lista */}
       {continentes.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="sad-outline" size={50} color="#666" />

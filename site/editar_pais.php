@@ -1,7 +1,7 @@
 <?php
 include 'conexão.php';
 
-$id = $nm_pais = $lingua_falada = $id_continente = '';
+$id = $nm_pais = $lingua_falada = $moeda = $id_continente = '';
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -12,6 +12,7 @@ if (isset($_GET['id'])) {
         $row = $result->fetch_assoc();
         $nm_pais = $row['nm_pais'];
         $lingua_falada = $row['lingua_falada'];
+        $moeda = $row['moeda'];
         $id_continente = $row['id_continente'];
     } else {
         echo "País não encontrado!";
@@ -23,9 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = $_POST['id'];
     $nm_pais = $_POST['nm_pais'];
     $lingua_falada = $_POST['lingua_falada'];
+    $moeda = $_POST['moeda'];
     $id_continente = $_POST['id_continente'];
 
-    $sql = "UPDATE paises SET nm_pais='$nm_pais', lingua_falada='$lingua_falada' WHERE id_paises=$id";
+    $sql = "UPDATE paises SET nm_pais='$nm_pais', lingua_falada='$lingua_falada', moeda='$moeda' WHERE id_paises=$id";
 
     if ($conex->query($sql) === TRUE) {
         header("Location: paises.php?continente_id=" . $id_continente);
@@ -64,6 +66,7 @@ $continente = $result_continente->fetch_assoc();
             <input type="hidden" name="id_continente" value="<?php echo htmlspecialchars($id_continente); ?>">
             Nome do País: <input type="text" name="nm_pais" value="<?php echo htmlspecialchars($nm_pais); ?>" required><br><br>
             Língua Falada: <input type="text" name="lingua_falada" value="<?php echo htmlspecialchars($lingua_falada); ?>" required><br><br>
+            Moeda: <input type="text" name="moeda" value="<?php echo htmlspecialchars($moeda); ?>" required><br><br>
             <input type="submit" value="Atualizar">
         </form>
         

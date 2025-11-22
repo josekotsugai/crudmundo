@@ -3,9 +3,10 @@ include 'conexão.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nm_cidades = $_POST['nm_cidades'];
+    $populacao = $_POST['populacao'];
     $id_pais = $_POST['id_pais'];
     
-    $sql = "INSERT INTO cidades (nm_cidades, id_pais) VALUES ('$nm_cidades', $id_pais)";
+    $sql = "INSERT INTO cidades (nm_cidades, populacao, id_pais) VALUES ('$nm_cidades', $populacao, $id_pais)";
     
     if ($conex->query($sql) === TRUE) {
         header("Location: cidades.php?pais_id=" . $id_pais);
@@ -42,7 +43,8 @@ $pais = $result_pais->fetch_assoc();
         
         <form method="post" action="cadastro_cidade.php">
             <input type="hidden" name="id_pais" value="<?php echo $pais_id; ?>">
-            Nome da Cidade: <input type="text" name="nm_cidades" required><br>
+            Nome da Cidade: <input type="text" name="nm_cidades" required><br><br>
+            População: <input type="number" name="populacao" min="0" required><br><br>
             <input type="submit" value="Cadastrar Cidade">
         </form>
         

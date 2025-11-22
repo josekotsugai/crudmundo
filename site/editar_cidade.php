@@ -1,7 +1,7 @@
 <?php
 include 'conexão.php';
 
-$id = $nm_cidades = $id_pais = '';
+$id = $nm_cidades = $populacao = $id_pais = '';
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -11,6 +11,7 @@ if (isset($_GET['id'])) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $nm_cidades = $row['nm_cidades'];
+        $populacao = $row['populacao'];
         $id_pais = $row['id_pais'];
     } else {
         echo "Cidade não encontrada!";
@@ -21,9 +22,10 @@ if (isset($_GET['id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = $_POST['id'];
     $nm_cidades = $_POST['nm_cidades'];
+    $populacao = $_POST['populacao'];
     $id_pais = $_POST['id_pais'];
 
-    $sql = "UPDATE cidades SET nm_cidades='$nm_cidades' WHERE id_cidades=$id";
+    $sql = "UPDATE cidades SET nm_cidades='$nm_cidades', populacao=$populacao WHERE id_cidades=$id";
 
     if ($conex->query($sql) === TRUE) {
         header("Location: cidades.php?pais_id=" . $id_pais);
@@ -60,7 +62,8 @@ $pais = $result_pais->fetch_assoc();
         <form method="post" action="editar_cidade.php">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
             <input type="hidden" name="id_pais" value="<?php echo htmlspecialchars($id_pais); ?>">
-            Nome da Cidade: <input type="text" name="nm_cidades" value="<?php echo htmlspecialchars($nm_cidades); ?>" required><br>
+            Nome da Cidade: <input type="text" name="nm_cidades" value="<?php echo htmlspecialchars($nm_cidades); ?>" required><br><br>
+            População: <input type="number" name="populacao" value="<?php echo htmlspecialchars($populacao); ?>" min="0" required><br><br>
             <input type="submit" value="Atualizar">
         </form>
         

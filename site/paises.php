@@ -40,6 +40,7 @@ $result_paises = $conex->query($sql_paises);
                 <th>ID</th>
                 <th>Nome do País</th>
                 <th>Língua Falada</th>
+                <th>Moeda</th>
                 <th>Ações</th>
             </tr>
 
@@ -50,6 +51,7 @@ $result_paises = $conex->query($sql_paises);
                             <td>" . $row["id_paises"] . "</td>
                             <td>" . $row["nm_pais"] . "</td>
                             <td>" . $row["lingua_falada"] . "</td>
+                            <td>" . $row["moeda"] . "</td>
                             <td>
                                 <a href='editar_pais.php?id=" . $row["id_paises"] . "'>Editar</a>
                                 <a href='deletar_pais.php?id=" . $row["id_paises"] . "' onclick='return confirm(\"Tem certeza?\")'>Excluir</a>
@@ -58,7 +60,7 @@ $result_paises = $conex->query($sql_paises);
                         </tr>";
                 }
             } else {
-                echo "<tr><td colspan='4'>Nenhum país cadastrado para este continente</td></tr>";
+                echo "<tr><td colspan='5'>Nenhum país cadastrado para este continente</td></tr>";
             }
             ?>
         </table>
@@ -68,3 +70,7 @@ $result_paises = $conex->query($sql_paises);
     </div>
 </body>
 </html>
+
+<?php
+$conex->close();
+?>
